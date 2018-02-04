@@ -1,16 +1,18 @@
-﻿<Window x:Class="AgileAutomations.MainWindow"
+﻿<Window x:Class="AgileAutomations.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgileAutomations"
         mc:Ignorable="d"
-        Height="350" Width="300" Icon="../Resources/AgileAutomationsLogo.png">
-    <Grid Background="CornflowerBlue">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Content="Select File" Click="SelectFile"/>
-            <Label x:Name="Rows"/>
-            <Button Content="Import" Click="Import"/>
+        Height="200" Width="200" Icon="../Resources/AgileAutomationsLogo.png" ResizeMode="NoResize">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" >
+            <Button Margin="5" Content="Select File" Command="{Binding SelectFileCommand}" 
+                    Background="DodgerBlue" BorderThickness="0" Foreground="White" Height="40" FontWeight="Bold"/>
+            <Button Margin="5" Content="Submit Data" Command="{Binding ImportCommand}" 
+                    Background="DodgerBlue" BorderThickness="0" Foreground="White" Height="40" FontWeight="Bold"/>
+            <Label Margin="5" Content="{Binding Feedback}" HorizontalContentAlignment="Center"/>
         </StackPanel>
         
     </Grid>

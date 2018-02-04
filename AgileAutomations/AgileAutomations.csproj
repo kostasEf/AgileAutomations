@@ -37,6 +37,15 @@
     <Reference Include="EPPlus, Version=4.1.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
       <HintPath>packages\EPPlus.4.1.1\lib\net40\EPPlus.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="RazorHosting, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\SimpleBrowser.0.5.79.0\lib\net40\RazorHosting.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleBrowser, Version=0.5.79.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\SimpleBrowser.0.5.79.0\lib\net40\SimpleBrowser.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
@@ -66,10 +75,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Helper\Bindings.cs" />
+    <Compile Include="Helper\DelegateCommand.cs" />
     <Compile Include="Helper\ExcelParser.cs" />
     <Compile Include="Helper\FileBrowser.cs" />
+    <Compile Include="Helper\HtmlHelper.cs" />
+    <Compile Include="Interface\IExcelParser.cs" />
+    <Compile Include="Interface\IHtmlHelper.cs" />
     <Compile Include="Interface\IFileBrowser.cs" />
     <Compile Include="Model\ContactFormData.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Interface\IMainWindowViewModel.cs" />
+    <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -102,9 +119,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModel\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Resources\AgileAutomationsLogo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
