@@ -13,8 +13,7 @@ namespace Test
     public class ExcelHelperTests
     {
         private IExcelHelper excelHelper;
-        //I am aware that the best way would be to create an excel file every time the test runs
-        private const string FILE_PATH = @"C:\TestData\AgileAutomations.xlsx";
+        private const string FILE_PATH = @"C:\TestData\AgileAutomationsTestData.xlsx";
         private ObservableCollection<ContactFormData> contactFormDataCollection;
 
         [OneTimeSetUp]
@@ -24,9 +23,39 @@ namespace Test
 
             contactFormDataCollection = new ObservableCollection<ContactFormData>
             {
-                new ContactFormData {Reference = "123"},
-                new ContactFormData {Reference = "321"}
+                new ContactFormData {Name = "Name1", Email = "Email1", Subject = "Subject1", Message = "Message1", Reference = "123"},
+                new ContactFormData {Name = "Name2", Email = "Email2", Subject = "Subject2", Message = "Message2", Reference = "321"},
+                new ContactFormData {Name = "Name3", Email = "Email3", Subject = "Subject3", Message = "Message3", Reference = "678"}
             };
+
+            File.Delete(FILE_PATH);
+            CreateAndPopulateExcel();
+        }
+
+        private void CreateAndPopulateExcel()
+        {
+            using (var excelPackage = new ExcelPackage(new FileInfo(FILE_PATH)))
+            {
+                ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.Add("Data");
+                var columns = typeof(ContactFormData).GetProperties();
+                var rows = contactFormDataCollection.Count;
+
+                for (int i = 1; i <= columns.Length; i++)
+                {
+                    workSheet.Cells[1, i].Value = columns[i - 1].Name;
+                }
+
+                for (int i = 0; i < rows; i++)
+                {
+                    workSheet.Cells[i + 2, 1].Value = contactFormDataCollection[i].Name;
+                    workSheet.Cells[i + 2, 2].Value = contactFormDataCollection[i].Email;
+                    workSheet.Cells[i + 2, 3].Value = contactFormDataCollection[i].Subject;
+                    workSheet.Cells[i + 2, 4].Value = contactFormDataCollection[i].Message;
+                    workSheet.Cells[i + 2, 5].Value = contactFormDataCollection[i].Reference;
+                }
+                
+                excelPackage.Save();
+            }
         }
 
         [Test]
