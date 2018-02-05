@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AgileAutomations"
         mc:Ignorable="d"
         Height="200" Width="200" Icon="../Resources/AgileAutomationsLogo.png" ResizeMode="NoResize">
     <Grid>
         <StackPanel VerticalAlignment="Center" >
-            <Button Margin="5" Content="Select File" Command="{Binding SelectFileCommand}" 
+            <Button Margin="5" Content="Extract rows from file" Command="{Binding ExtractRowsCommand}" 
                     Background="DodgerBlue" BorderThickness="0" Foreground="White" Height="40" FontWeight="Bold"/>
-            <Button Margin="5" Content="Submit Data" Command="{Binding ImportCommand}" 
+            <Button Margin="5" Content="Submit rows to contact form" Command="{Binding SubmitFormCommand}"
+                    IsEnabled="{Binding FileSelected}"
                     Background="DodgerBlue" BorderThickness="0" Foreground="White" Height="40" FontWeight="Bold"/>
             <Label Margin="5" Content="{Binding Feedback}" HorizontalContentAlignment="Center"/>
         </StackPanel>

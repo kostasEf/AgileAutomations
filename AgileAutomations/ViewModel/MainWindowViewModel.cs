@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -14,32 +13,36 @@ namespace AgileAutomations.ViewModel
     public class MainWindowViewModel : INotifyPropertyChanged, IMainWindowViewModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private IList<ContactFormData> contactFormDataList;
-        private IExcelParser excelParser;
-        private IFileBrowser fileBrowser;
-        private IHtmlHelper htmlHelper;
+        public ObservableCollection<ContactFormData> ContactFormDataCollection { get; set; }
+        private readonly IExcelHelper excelHelper;
+        private readonly IFileBrowser fileBrowser;
+        private readonly IHtmlHelper htmlHelper;
         private string filePath;
 
-        public ICommand SelectFileCommand { get; private set; }
-        public ICommand ImportCommand { get; private set; }
+        public ICommand ExtractRowsCommand { get; private set; }
+        public ICommand SubmitFormCommand { get; private set; }
 
-        public MainWindowViewModel(IExcelParser excelParser, IFileBrowser fileBrowser, IHtmlHelper htmlHelper)
+        public MainWindowViewModel(IExcelHelper excelHelper, IFileBrowser fileBrowser, IHtmlHelper htmlHelper)
         {
             this.fileBrowser = fileBrowser;
-            this.excelParser = excelParser;
+            this.excelHelper = excelHelper;
             this.htmlHelper = htmlHelper;
 
-            SelectFileCommand = new DelegateCommand(SelectFile);
-            ImportCommand = new DelegateCommand(SubmitForm);
+            ExtractRowsCommand = new DelegateCommand(ExtractRows);
+            SubmitFormCommand = new DelegateCommand(SubmitForm);
+            ContactFormDataCollection = new ObservableCollection<ContactFormData>();
         }
 
         private string feedback;
-        public string Feedback {
+        public string Feedback
+        {
             get => feedback;
             set
             {
                 if(feedback == value)
+                {
                     return;
+                }
 
                 feedback = value;
 
@@ -47,45 +50,54 @@ namespace AgileAutomations.ViewModel
             }
         }
 
-        private void SelectFile()
+        private bool fileSelected;
+        public bool FileSelected
+        {
+            get => fileSelected;
+            set
+            {
+                if (fileSelected == value)
+                {
+                    return;
+                }
+
+                fileSelected = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        private void ExtractRows()
         {
             filePath = fileBrowser.GetFullName();
 
             if (!string.IsNullOrWhiteSpace(filePath))
             {
-                contactFormDataList = excelParser.ExtractRows(filePath);
-                Feedback = $"Rows found: {contactFormDataList.Count}";
+                ContactFormDataCollection = excelHelper.ExtractRows(filePath);
+
+                if (ContactFormDataCollection.Any())
+                {
+                    Feedback = $"Rows found: {ContactFormDataCollection.Count}";
+                    FileSelected = true;
+                }
             }
         }
 
         private void SubmitForm()
         {
-            foreach (var contactFormData in contactFormDataList)
+            foreach (ContactFormData contactFormData in ContactFormDataCollection)
             {
                 contactFormData.Reference = htmlHelper.SubmitContactForm(contactFormData);
             }
 
-            excelParser.AddReferenceNumbers(filePath, contactFormDataList.ToList());
+            excelHelper.AddReferenceNumbers(filePath, ContactFormDataCollection);
 
             Feedback = "Success";
+            FileSelected = false;
 
-            OpenExcelFile();
+            excelHelper.OpenExcelFile(filePath);
         }
-
-        private void OpenExcelFile()
-        {
-            var start = new ProcessStartInfo
-            {
-                FileName = filePath
-            };
-
-            using (var process = new Process { StartInfo = start })
-            {
-                process.Start();
-                process.WaitForExit();
-            }
-        }
-
+        
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

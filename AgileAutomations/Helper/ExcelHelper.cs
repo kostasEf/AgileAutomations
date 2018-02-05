@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AgileAutomations.Interface;
@@ -7,41 +10,61 @@ using OfficeOpenXml;
 
 namespace AgileAutomations.Helper
 {
-    public class ExcelParser : IExcelParser
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class ExcelHelper : IExcelHelper
     {
-        public IList<ContactFormData> ExtractRows(string path)
+        public ObservableCollection<ContactFormData> ExtractRows(string path)
         {  
             using (var excelPackage = new ExcelPackage(new FileInfo(path)))
             {
-                var workSheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
-                return PopulateContactFormDataList(workSheet, true).ToList();
+                ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                return PopulateContactFormDataList(workSheet, true);
             }
         }
 
-        public void AddReferenceNumbers(string path, IList<ContactFormData> contactFormDataList)
+        public void AddReferenceNumbers(string path, ObservableCollection<ContactFormData> contactFormDataList)
         {
             using (var excelPackage = new ExcelPackage(new FileInfo(path)))
             {
-                var workSheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
+                ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.FirstOrDefault();
                 var row = 2;
-                foreach (var contactFormData in contactFormDataList)
+                int column = typeof(ContactFormData).GetProperties().Length;
+                foreach (ContactFormData contactFormData in contactFormDataList)
                 {
-                    workSheet.Cells[row, 5].Value = contactFormData.Reference;
+                    if (workSheet != null)
+                    {
+                        workSheet.Cells[row, column].Value = Convert.ToInt32(contactFormData.Reference);
+                    }
+
                     row++;
                 }
                 excelPackage.Save();
             }          
         }
 
-        private IList<ContactFormData> PopulateContactFormDataList(ExcelWorksheet workSheet, bool firstRowHeader)
+        public void OpenExcelFile(string filePath)
         {
-            IList<ContactFormData> contactFormDataList = new List<ContactFormData>();
+            var start = new ProcessStartInfo
+            {
+                FileName = filePath
+            };
+
+            using (var process = new Process { StartInfo = start })
+            {
+                process.Start();
+                process.WaitForExit();
+            }
+        }
+
+        private ObservableCollection<ContactFormData> PopulateContactFormDataList(ExcelWorksheet workSheet, bool firstRowHeader)
+        {
+            var contactFormDataCollection = new ObservableCollection<ContactFormData>();
 
             if (workSheet != null)
             {
                 var headers = new Dictionary<string, int>();
 
-                for (var rowIndex = workSheet.Dimension.Start.Row; rowIndex <= workSheet.Dimension.End.Row; rowIndex++)
+                for (int rowIndex = workSheet.Dimension.Start.Row; rowIndex <= workSheet.Dimension.End.Row; rowIndex++)
                 {
                     if (rowIndex == 1 && firstRowHeader)
                     {
@@ -49,19 +72,19 @@ namespace AgileAutomations.Helper
                     }
                     else
                     {
-                        contactFormDataList.Add(new ContactFormData
+                        contactFormDataCollection.Add(new ContactFormData
                         {
                             Name = ParseWorksheetValue(workSheet, headers, rowIndex, "Name"),
                             Email = ParseWorksheetValue(workSheet, headers, rowIndex, "Email"),
                             Subject = ParseWorksheetValue(workSheet, headers, rowIndex, "Subject"),
-                            Message = ParseWorksheetValue(workSheet, headers, rowIndex, "Message"),
+                            Message = ParseWorksheetValue(workSheet, headers, rowIndex, "Message")
                         });
 
                     }
                 }
             }
 
-            return contactFormDataList;
+            return contactFormDataCollection;
         }
 
         private Dictionary<string, int> GetExcelHeader(ExcelWorksheet workSheet, int rowIndex)
@@ -70,11 +93,11 @@ namespace AgileAutomations.Helper
 
             if (workSheet != null)
             {
-                for (var columnIndex = workSheet.Dimension.Start.Column; columnIndex <= workSheet.Dimension.End.Column; columnIndex++)
+                for (int columnIndex = workSheet.Dimension.Start.Column; columnIndex <= workSheet.Dimension.End.Column; columnIndex++)
                 {
                     if (workSheet.Cells[rowIndex, columnIndex].Value != null)
                     {
-                        var columnName = workSheet.Cells[rowIndex, columnIndex].Value.ToString();
+                        string columnName = workSheet.Cells[rowIndex, columnIndex].Value.ToString();
 
                         if (!headers.ContainsKey(columnName) && !string.IsNullOrEmpty(columnName))
                         {
@@ -89,7 +112,7 @@ namespace AgileAutomations.Helper
 
         private string ParseWorksheetValue(ExcelWorksheet workSheet, Dictionary<string, int> headers, int rowIndex, string columnName)
         {
-            var value = string.Empty;
+            string value = string.Empty;
             var columnIndex = headers.ContainsKey(columnName) ? headers[columnName] : (int?)null;
 
             if (workSheet != null && columnIndex != null && workSheet.Cells[rowIndex, columnIndex.Value].Value != null)

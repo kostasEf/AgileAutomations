@@ -77,10 +77,10 @@
     </Compile>
     <Compile Include="Helper\Bindings.cs" />
     <Compile Include="Helper\DelegateCommand.cs" />
-    <Compile Include="Helper\ExcelParser.cs" />
+    <Compile Include="Helper\ExcelHelper.cs" />
     <Compile Include="Helper\FileBrowser.cs" />
     <Compile Include="Helper\HtmlHelper.cs" />
-    <Compile Include="Interface\IExcelParser.cs" />
+    <Compile Include="Interface\IExcelHelper.cs" />
     <Compile Include="Interface\IHtmlHelper.cs" />
     <Compile Include="Interface\IFileBrowser.cs" />
     <Compile Include="Model\ContactFormData.cs" />
